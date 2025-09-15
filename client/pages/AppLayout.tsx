@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Library, LogOut, Settings, Sparkles, User } from "lucide-react";
+import { History, Library, LogOut, Settings, Sparkles, User } from "lucide-react";
 
 export default function AppLayout() {
   const location = useLocation();
@@ -8,6 +8,7 @@ export default function AppLayout() {
 
   const links = [
     { to: "/app/generate", label: "Generate", icon: Sparkles },
+    { to: "/app/history", label: "History", icon: History },
     { to: "/app/library", label: "Library", icon: Library },
     { to: "/app/settings", label: "Settings", icon: Settings },
   ];

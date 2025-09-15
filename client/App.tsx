@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./pages/AppLayout";
 import Generate from "./pages/Generate";
+import History from "./pages/History";
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<Navigate to="generate" replace />} />
             <Route path="generate" element={<Generate />} />
+            <Route path="history" element={<History />} />
             <Route path="library" element={<Library />} />
             <Route path="settings" element={<Settings />} />
           </Route>
