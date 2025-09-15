@@ -1,62 +1,68 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Lock, Mail } from "lucide-react";
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchDemo();
-  }, []);
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
-    try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
-    }
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate("/app/generate", { replace: true });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
-        </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
-      </div>
+    <div className="min-h-screen grid grid-rows-[auto,1fr] bg-background text-foreground">
+      <header className="py-8 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-xl font-bold text-foreground">
+          <div className="size-9 rounded-md bg-muted flex items-center justify-center">SA</div>
+          <span>SaaS Auto-Flow</span>
+        </div>
+      </header>
+      <main className="flex items-start justify-center px-4">
+        <div className="w-full max-w-md rounded-lg border bg-card p-8 shadow-sm">
+          <h1 className="text-center text-2xl font-semibold mb-6">Login</h1>
+          <form onSubmit={onSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2 text-muted-foreground">
+                <Mail className="size-4" /> Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="bg-background"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center gap-2 text-muted-foreground">
+                <Lock className="size-4" /> Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="bg-background"
+              />
+            </div>
+            <Button type="submit" className="w-full">Login</Button>
+          </form>
+          <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
+            <a href="#" className="hover:underline">Forgot password?</a>
+            <a href="#" className="hover:underline">Create account</a>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
