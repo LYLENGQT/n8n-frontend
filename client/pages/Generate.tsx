@@ -24,6 +24,7 @@ export default function Generate() {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
     null,
   );
+  const [previewPackageId, setPreviewPackageId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<string[]>([]);
@@ -56,7 +57,6 @@ export default function Generate() {
   const runGenerate = async () => {
     setIsGenerating(true);
     await new Promise((r) => setTimeout(r, 1200));
-    // Create 4 gray placeholders with data URLs
     const imgs = Array.from({ length: 4 }).map((_, i) =>
       `data:image/svg+xml;utf8,${encodeURIComponent(
         `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
@@ -65,6 +65,9 @@ export default function Generate() {
       )}`,
     );
     setResults(imgs);
+    if (selectedPackageId) {
+      addRecord({ id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`, createdAt: Date.now(), packageId: selectedPackageId, images: imgs });
+    }
     setIsGenerating(false);
   };
 
@@ -83,12 +86,22 @@ export default function Generate() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
-      <header className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Choose Pose Package</span>
-        <span>→</span>
-        <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Upload Image</span>
-        <span>→</span>
-        <span className={cn("px-2 py-1 rounded bg-accent", step === 3 && "font-semibold text-foreground")}>3. Generate</span>
+      <header className="flex items-center justify-between gap-2">
+        <div>
+          {step > 1 && (
+            <Button variant="ghost" className="gap-2" onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}>
+              <ChevronLeft className="size-4" /> Back
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Choose Pose Package</span>
+          <span>→</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Upload Image</span>
+          <span>→</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 3 && "font-semibold text-foreground")}>3. Generate</span>
+        </div>
+        <div className="w-[88px]" />
       </header>
 
       {step === 1 && (
@@ -97,7 +110,7 @@ export default function Generate() {
             {POSE_PACKAGES.map((p) => (
               <button
                 key={p.id}
-                onClick={() => setSelectedPackageId(p.id)}
+                onClick={() => setPreviewPackageId(p.id)}
                 className={cn(
                   "group relative rounded-lg border bg-card p-2 text-left transition hover:border-foreground/40",
                   selectedPackageId === p.id && "border-2",
@@ -119,6 +132,31 @@ export default function Generate() {
             ))}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">Hover to preview poses on desktop. Tap to expand on mobile.</p>
+
+          <Dialog open={!!previewPackageId} onOpenChange={(o) => !o && setPreviewPackageId(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {POSE_PACKAGES.find((pp) => pp.id === previewPackageId)?.name || "Pose Package"}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="aspect-square rounded-md bg-muted" />
+                ))}
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={() => {
+                    if (previewPackageId) setSelectedPackageId(previewPackageId);
+                    setPreviewPackageId(null);
+                  }}
+                >
+                  Select
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </section>
       )}
 
