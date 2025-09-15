@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, CloudUpload, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { addRecord } from "@/lib/history";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Check, ChevronLeft, CloudUpload, Loader2, RefreshCw, Sparkles } from "lucide-react";
 
 type PosePackage = {
   id: string;
