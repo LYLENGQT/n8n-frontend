@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { addRecord } from "@/lib/history";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, ChevronLeft, CloudUpload, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { Check, ChevronLeft, CloudUpload, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
 
 type PosePackage = {
   id: string;
@@ -26,6 +26,7 @@ export default function Generate() {
   );
   const [previewPackageId, setPreviewPackageId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [advanceOnFile, setAdvanceOnFile] = useState(false);
   const [advanceOnPackage, setAdvanceOnPackage] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,6 +68,17 @@ export default function Generate() {
       setFile(f);
     }
   };
+
+  useEffect(() => {
+    if (!file) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
 
   const runGenerate = async () => {
     setIsGenerating(true);
@@ -172,6 +184,9 @@ export default function Generate() {
               </div>
             </DialogContent>
           </Dialog>
+          <div className="pt-4 flex justify-end">
+            <Button onClick={() => setStep(3)} disabled={!selectedPackageId}>Next</Button>
+          </div>
         </section>
       )}
 
@@ -180,11 +195,32 @@ export default function Generate() {
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
-            className="border-2 border-dashed rounded-lg bg-card p-6 flex flex-col items-center justify-center text-center min-h-56"
+            className="relative border-2 border-dashed rounded-lg bg-card p-6 flex flex-col items-center justify-center text-center min-h-56 overflow-hidden"
           >
-            <CloudUpload className="size-8 text-muted-foreground mb-3" />
-            <p className="text-sm">Drag and drop image here</p>
-            <p className="text-xs text-muted-foreground">Max size 10MB. JPG/PNG supported.</p>
+            {previewUrl ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewUrl} alt="Uploaded preview" className="absolute inset-0 w-full h-full object-cover" />
+                <button
+                  aria-label="Clear image"
+                  onClick={() => {
+                    setFile(null);
+                    setResults([]);
+                    setAdvanceOnFile(false);
+                    setStep(1);
+                  }}
+                  className="absolute right-2 top-2 inline-flex items-center justify-center rounded-md bg-background/80 hover:bg-background/90 border px-2 py-1 text-xs"
+                >
+                  <X className="size-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <CloudUpload className="size-8 text-muted-foreground mb-3" />
+                <p className="text-sm">Drag and drop image here</p>
+                <p className="text-xs text-muted-foreground">Max size 10MB. JPG/PNG supported.</p>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <label className="relative">
@@ -197,12 +233,15 @@ export default function Generate() {
               <span className="text-xs text-muted-foreground truncate">Selected: {file.name}</span>
             )}
           </div>
+          <div className="pt-2 flex justify-end">
+            <Button onClick={() => setStep(2)} disabled={!file}>Next</Button>
+          </div>
         </section>
       )}
 
       {step === 3 && (
         <section aria-label="Generate" className="space-y-6">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-2">
             <Button onClick={runGenerate} disabled={isGenerating} className="h-12 px-6">
               {isGenerating ? (
                 <>
@@ -216,6 +255,7 @@ export default function Generate() {
                 </>
               )}
             </Button>
+            <Button onClick={runGenerate} disabled={isGenerating} className="h-12 px-6">Next</Button>
           </div>
 
           {isGenerating && (
