@@ -36,12 +36,12 @@ export default function Generate() {
   );
 
   useEffect(() => {
-    if (selectedPackageId && step === 1) setStep(2);
-  }, [selectedPackageId, step]);
+    if (file && step === 1) setStep(2);
+  }, [file, step]);
 
   useEffect(() => {
-    if (file && step === 2) setStep(3);
-  }, [file, step]);
+    if (selectedPackageId && step === 2) setStep(3);
+  }, [selectedPackageId, step]);
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -95,16 +95,16 @@ export default function Generate() {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Choose Pose Package</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Upload Image</span>
           <span>→</span>
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Upload Image</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Choose Pose Package</span>
           <span>→</span>
           <span className={cn("px-2 py-1 rounded bg-accent", step === 3 && "font-semibold text-foreground")}>3. Generate</span>
         </div>
         <div className="w-[88px]" />
       </header>
 
-      {step === 1 && (
+      {step === 2 && (
         <section aria-label="Choose Pose Package">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {POSE_PACKAGES.map((p) => (
@@ -160,7 +160,7 @@ export default function Generate() {
         </section>
       )}
 
-      {step === 2 && (
+      {step === 1 && (
         <section aria-label="Upload Image" className="space-y-4">
           <div
             onDragOver={(e) => e.preventDefault()}
@@ -240,7 +240,7 @@ export default function Generate() {
           )}
 
           {!results.length && !isGenerating && (
-            <p className="text-center text-sm text-muted-foreground">Choose a package and upload an image to generate results.</p>
+            <p className="text-center text-sm text-muted-foreground">Upload an image and choose a package to generate results.</p>
           )}
         </section>
       )}
