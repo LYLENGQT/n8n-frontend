@@ -26,6 +26,8 @@ export default function Generate() {
   );
   const [previewPackageId, setPreviewPackageId] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [advanceOnFile, setAdvanceOnFile] = useState(false);
+  const [advanceOnPackage, setAdvanceOnPackage] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<string[]>([]);
 
@@ -36,22 +38,34 @@ export default function Generate() {
   );
 
   useEffect(() => {
-    if (file && step === 1) setStep(2);
-  }, [file, step]);
+    if (advanceOnFile && file && step === 1) {
+      setStep(2);
+      setAdvanceOnFile(false);
+    }
+  }, [advanceOnFile, file, step]);
 
   useEffect(() => {
-    if (selectedPackageId && step === 2) setStep(3);
-  }, [selectedPackageId, step]);
+    if (advanceOnPackage && selectedPackageId && step === 2) {
+      setStep(3);
+      setAdvanceOnPackage(false);
+    }
+  }, [advanceOnPackage, selectedPackageId, step]);
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const f = e.dataTransfer.files?.[0];
-    if (f && f.size <= 10 * 1024 * 1024) setFile(f);
+    if (f && f.size <= 10 * 1024 * 1024) {
+      setAdvanceOnFile(true);
+      setFile(f);
+    }
   };
 
   const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f && f.size <= 10 * 1024 * 1024) setFile(f);
+    if (f && f.size <= 10 * 1024 * 1024) {
+      setAdvanceOnFile(true);
+      setFile(f);
+    }
   };
 
   const runGenerate = async () => {
@@ -149,6 +163,7 @@ export default function Generate() {
                 <Button
                   onClick={() => {
                     if (previewPackageId) setSelectedPackageId(previewPackageId);
+                    setAdvanceOnPackage(true);
                     setPreviewPackageId(null);
                   }}
                 >
