@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { addRecord } from "@/lib/history";
@@ -21,16 +21,62 @@ import {
 type PosePackage = {
   id: string;
   name: string;
+  previews?: string[];
 };
+
+const CANDID_PREVIEWS: string[] = [
+  ((import.meta as any).env?.VITE_CANDID_PREVIEW_1 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758183894/xlpv5uvpccewusp9v02b.png",
+  ((import.meta as any).env?.VITE_CANDID_PREVIEW_2 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757927345/iwcg4vwoafaautnc6jrr.png",
+  ((import.meta as any).env?.VITE_CANDID_PREVIEW_3 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757935393/rlb5ck2q10jdyr3kcyyf.png",
+  ((import.meta as any).env?.VITE_CANDID_PREVIEW_4 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758182881/zrkkw7liogbm2gsyh12u.png",
+];
+
+const STANDARD_PREVIEWS: string[] = [
+  ((import.meta as any).env?.VITE_STANDARD_PREVIEW_1 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757927503/eycykqcdejrtaugbeqmg.png",
+  ((import.meta as any).env?.VITE_STANDARD_PREVIEW_2 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757933745/qyo1souc5cf4q4qzjaup.png",
+  ((import.meta as any).env?.VITE_STANDARD_PREVIEW_3 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758182095/icwckivsfhcvzl5ssdau.png",
+  ((import.meta as any).env?.VITE_STANDARD_PREVIEW_4 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758182624/us2vtp4shvw292uwmohs.png",
+];
+
+const SMILING_PREVIEWS: string[] = [
+  ((import.meta as any).env?.VITE_SMILING_PREVIEW_1 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758188173/efs5ydrpkx6tuz2cnl5x.png",
+  ((import.meta as any).env?.VITE_SMILING_PREVIEW_2 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758188468/my4ckhjfkqdudtitg03z.png",
+  ((import.meta as any).env?.VITE_SMILING_PREVIEW_3 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757936249/grzk0cpjtjbhmofdts4c.png",
+  ((import.meta as any).env?.VITE_SMILING_PREVIEW_4 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758182624/mtreedlwvn6miaqzgcgy.png",
+];
+
+const SERIOUS_PREVIEWS: string[] = [
+  ((import.meta as any).env?.VITE_SERIOUS_PREVIEW_1 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758187806/ejp5rblbl81d92iolecs.png",
+  ((import.meta as any).env?.VITE_SERIOUS_PREVIEW_2 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758186139/ukhzha0uw2jyci4vrwvv.png",
+  ((import.meta as any).env?.VITE_SERIOUS_PREVIEW_3 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758176864/kanhrdgitooe19heghqu.png",
+  ((import.meta as any).env?.VITE_SERIOUS_PREVIEW_4 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1757935785/u2zgkz05q3hfp6w5nn25.png",
+];
 
 const POSE_PACKAGES: PosePackage[] = [
   {
     id: "Candid Face to Face Event Speaker",
     name: "Candid Face to Face Event Speaker",
+    previews: CANDID_PREVIEWS,
   },
-  { id: "Standard Photoshoot", name: "Standard Photoshoot" },
-  { id: "Smiling", name: "Smiling" },
-  { id: "Serious", name: "Serious" },
+  { id: "Standard Photoshoot", name: "Standard Photoshoot", previews: STANDARD_PREVIEWS },
+  { id: "Smiling", name: "Smiling", previews: SMILING_PREVIEWS },
+  { id: "Serious", name: "Serious", previews: SERIOUS_PREVIEWS },
 ];
 
 export default function Generate() {
@@ -45,6 +91,7 @@ export default function Generate() {
   const [advanceOnPackage, setAdvanceOnPackage] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Derive selected package
   const selectedPackage = useMemo(
@@ -199,7 +246,7 @@ export default function Generate() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="space-y-8">
       <header className="flex items-center justify-between gap-2">
         <div>
           {step > 1 && (
@@ -217,7 +264,7 @@ export default function Generate() {
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <span
             className={cn(
-              "px-2 py-1 rounded bg-accent",
+              "px-2 py-1 rounded bg-primary/10",
               step === 1 && "font-semibold text-foreground",
             )}
           >
@@ -226,7 +273,7 @@ export default function Generate() {
           <span>→</span>
           <span
             className={cn(
-              "px-2 py-1 rounded bg-accent",
+              "px-2 py-1 rounded bg-primary/10",
               step === 2 && "font-semibold text-foreground",
             )}
           >
@@ -235,7 +282,7 @@ export default function Generate() {
           <span>→</span>
           <span
             className={cn(
-              "px-2 py-1 rounded bg-accent",
+              "px-2 py-1 rounded bg-primary/10",
               step === 3 && "font-semibold text-foreground",
             )}
           >
@@ -246,33 +293,45 @@ export default function Generate() {
       </header>
 
       {step === 1 && (
-        <section aria-label="Choose Pose Package">
+        <section aria-label="Choose Pose Package" className="space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {POSE_PACKAGES.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setPreviewPackageId(p.id)}
                 className={cn(
-                  "group relative rounded-lg border bg-card p-2 text-left transition hover:border-foreground/40",
-                  selectedPackageId === p.id && "border-2",
+                  "group relative rounded-xl border bg-card p-2 text-left transition hover:border-primary/30 hover:shadow-sm",
+                  selectedPackageId === p.id && "ring-2 ring-primary/40",
                 )}
               >
-                <div className="aspect-square rounded-md bg-muted grid grid-cols-2 grid-rows-2 gap-1 p-1">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="bg-gray-300" />
-                  ))}
+                <div className="aspect-square rounded-lg bg-gradient-to-br from-muted to-background grid grid-cols-2 grid-rows-2 gap-1 p-1 overflow-hidden">
+                  {(p.previews?.slice(0, 4) ?? Array.from({ length: 4 })).map(
+                    (_v, i) => {
+                      const src = p.previews?.[i];
+                      return src ? (
+                        <img
+                          key={i}
+                          src={src}
+                          alt={`${p.name} preview ${i + 1}`}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      ) : (
+                        <div key={i} className="bg-muted rounded" />
+                      );
+                    },
+                  )}
                 </div>
                 <div className="mt-2 text-sm">{p.name}</div>
                 {selectedPackageId === p.id && (
-                  <div className="absolute top-2 right-2 bg-foreground text-background rounded-full p-1">
+                  <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-sm">
                     <Check className="size-3" />
                   </div>
                 )}
-                <div className="absolute inset-0 rounded-lg border border-transparent group-hover:border-foreground/30 pointer-events-none" />
+                <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-primary/30 pointer-events-none" />
               </button>
             ))}
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">
+          <p className="mt-2 text-xs text-muted-foreground">
             Hover to preview poses on desktop. Tap to expand on mobile.
           </p>
 
@@ -280,7 +339,7 @@ export default function Generate() {
             open={!!previewPackageId}
             onOpenChange={(o) => !o && setPreviewPackageId(null)}
           >
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>
                   {POSE_PACKAGES.find((pp) => pp.id === previewPackageId)
@@ -288,9 +347,25 @@ export default function Generate() {
                 </DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-square rounded-md bg-muted" />
-                ))}
+                {(POSE_PACKAGES.find((pp) => pp.id === previewPackageId)
+                  ?.previews?.slice(0, 4) ?? Array.from({ length: 4 })).map(
+                  (_v, i) => {
+                    const pkg = POSE_PACKAGES.find(
+                      (pp) => pp.id === previewPackageId,
+                    );
+                    const src = pkg?.previews?.[i];
+                    return src ? (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`Preview ${i + 1}`}
+                        className="aspect-square w-full h-full object-cover rounded-md"
+                      />
+                    ) : (
+                      <div key={i} className="aspect-square rounded-md bg-muted" />
+                    );
+                  },
+                )}
               </div>
               <div className="flex justify-end pt-2">
                 <Button
@@ -306,7 +381,7 @@ export default function Generate() {
               </div>
             </DialogContent>
           </Dialog>
-          <div className="pt-4 flex justify-end">
+          <div className="pt-2 flex justify-end">
             <Button onClick={() => setStep(2)} disabled={!selectedPackageId}>
               Next
             </Button>
@@ -315,11 +390,12 @@ export default function Generate() {
       )}
 
       {step === 2 && (
-        <section aria-label="Upload Image" className="space-y-4">
+        <section aria-label="Upload Image" className="space-y-4 max-w-3xl mx-auto w-full">
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
-            className="relative border-2 border-dashed rounded-lg bg-card p-6 flex flex-col items-center justify-center text-center min-h-56 overflow-hidden"
+            onClick={() => fileInputRef.current?.click()}
+            className="relative border-2 border-dashed rounded-xl bg-card p-6 flex flex-col items-center justify-center text-center min-h-56 overflow-auto resize-y cursor-pointer"
           >
             {previewUrl ? (
               <>
@@ -327,17 +403,18 @@ export default function Generate() {
                 <img
                   src={previewUrl}
                   alt="Uploaded preview"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
                 <button
                   aria-label="Clear image"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setFile(null);
                     setResults([]);
                     setAdvanceOnFile(false);
                     setStep(2);
                   }}
-                  className="absolute right-2 top-2 inline-flex items-center justify-center rounded-md bg-background/80 hover:bg-background/90 border px-2 py-1 text-xs"
+                  className="absolute right-2 top-2 inline-flex items-center justify-center rounded-md bg-background/80 hover:bg-background/90 border px-2 py-1 text-xs shadow-sm"
                 >
                   <X className="size-4" />
                 </button>
@@ -359,8 +436,9 @@ export default function Generate() {
                 accept="image/*"
                 onChange={onInput}
                 className="hidden"
+                ref={fileInputRef}
               />
-              <span className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
+              <span className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm hover:bg-primary/10 cursor-pointer">
                 <CloudUpload className="size-4" /> Upload
               </span>
             </label>
@@ -402,7 +480,7 @@ export default function Generate() {
 
           {isGenerating && (
             <div className="mx-auto max-w-xl h-2 bg-muted rounded overflow-hidden">
-              <div className="h-full w-1/3 bg-foreground/60 animate-pulse" />
+              <div className="h-full w-1/3 bg-primary/60 animate-pulse" />
             </div>
           )}
 
@@ -412,9 +490,9 @@ export default function Generate() {
                 {results.map((src, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border bg-card p-2 flex flex-col gap-2"
+                    className="rounded-xl border bg-card/90 backdrop-blur p-2 flex flex-col gap-2 shadow-sm"
                   >
-                    <div className="aspect-square rounded-md bg-muted overflow-hidden flex items-center justify-center">
+                    <div className="aspect-square rounded-lg bg-muted overflow-hidden flex items-center justify-center">
                       {src ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -423,7 +501,7 @@ export default function Generate() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                        <Loader2 className="size-6 animate-spin text-primary" />
                       )}
                     </div>
                     <div className="flex items-center gap-2">

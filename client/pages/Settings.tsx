@@ -4,10 +4,10 @@ import { Label } from "@/components/ui/label";
 
 export default function Settings() {
   return (
-    <div className="p-4 md:p-8 space-y-8">
+    <div className="space-y-8">
       <section>
-        <h2 className="text-lg font-semibold mb-4">User Profile</h2>
-        <div className="grid gap-4 max-w-xl">
+        <h2 className="text-lg font-semibold mb-4 tracking-tight">User Profile</h2>
+        <div className="grid gap-4 max-w-xl rounded-xl border bg-card/90 backdrop-blur p-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input id="name" placeholder="Your name" />
@@ -27,8 +27,8 @@ export default function Settings() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-4">Preferences</h2>
-        <div className="grid gap-2 max-w-xl">
+        <h2 className="text-lg font-semibold mb-4 tracking-tight">Preferences</h2>
+        <div className="grid gap-2 max-w-xl rounded-xl border bg-card/90 backdrop-blur p-4">
           <label className="flex items-center gap-3 text-sm">
             <input type="checkbox" className="size-4" /> Enable notifications
           </label>
