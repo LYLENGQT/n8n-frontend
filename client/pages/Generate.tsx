@@ -82,7 +82,8 @@ export default function Generate() {
     setIsGenerating(true);
 
     try {
-      const WEBHOOK_URL = (import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined;
+      const DEFAULT_WEBHOOK_URL = "https://n8n.srv931715.hstgr.cloud/webhook-test/virtual-photoshoot";
+      const WEBHOOK_URL = ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ?? DEFAULT_WEBHOOK_URL;
       if (WEBHOOK_URL && selectedPackageId && file) {
         const fd = new FormData();
         fd.append("packageName", selectedPackage?.name ?? selectedPackageId);
