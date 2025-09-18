@@ -39,18 +39,18 @@ export default function Generate() {
   );
 
   useEffect(() => {
-    if (advanceOnFile && file && step === 1) {
+    if (advanceOnPackage && selectedPackageId && step === 1) {
       setStep(2);
-      setAdvanceOnFile(false);
-    }
-  }, [advanceOnFile, file, step]);
-
-  useEffect(() => {
-    if (advanceOnPackage && selectedPackageId && step === 2) {
-      setStep(3);
       setAdvanceOnPackage(false);
     }
   }, [advanceOnPackage, selectedPackageId, step]);
+
+  useEffect(() => {
+    if (advanceOnFile && file && step === 2) {
+      setStep(3);
+      setAdvanceOnFile(false);
+    }
+  }, [advanceOnFile, file, step]);
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -121,16 +121,16 @@ export default function Generate() {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Upload Image</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Choose Pose Package</span>
           <span>→</span>
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Choose Pose Package</span>
+          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Upload Image</span>
           <span>→</span>
           <span className={cn("px-2 py-1 rounded bg-accent", step === 3 && "font-semibold text-foreground")}>3. Generate</span>
         </div>
         <div className="w-[88px]" />
       </header>
 
-      {step === 2 && (
+      {step === 1 && (
         <section aria-label="Choose Pose Package">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {POSE_PACKAGES.map((p) => (
@@ -185,12 +185,12 @@ export default function Generate() {
             </DialogContent>
           </Dialog>
           <div className="pt-4 flex justify-end">
-            <Button onClick={() => setStep(3)} disabled={!selectedPackageId}>Next</Button>
+            <Button onClick={() => setStep(2)} disabled={!selectedPackageId}>Next</Button>
           </div>
         </section>
       )}
 
-      {step === 1 && (
+      {step === 2 && (
         <section aria-label="Upload Image" className="space-y-4">
           <div
             onDragOver={(e) => e.preventDefault()}
@@ -207,7 +207,7 @@ export default function Generate() {
                     setFile(null);
                     setResults([]);
                     setAdvanceOnFile(false);
-                    setStep(1);
+                    setStep(2);
                   }}
                   className="absolute right-2 top-2 inline-flex items-center justify-center rounded-md bg-background/80 hover:bg-background/90 border px-2 py-1 text-xs"
                 >
@@ -234,7 +234,7 @@ export default function Generate() {
             )}
           </div>
           <div className="pt-2 flex justify-end">
-            <Button onClick={() => setStep(2)} disabled={!file}>Next</Button>
+            <Button onClick={() => setStep(3)} disabled={!file}>Next</Button>
           </div>
         </section>
       )}
@@ -295,7 +295,7 @@ export default function Generate() {
           )}
 
           {!results.length && !isGenerating && (
-            <p className="text-center text-sm text-muted-foreground">Upload an image and choose a package to generate results.</p>
+            <p className="text-center text-sm text-muted-foreground">Choose a package and upload an image to generate results.</p>
           )}
         </section>
       )}
