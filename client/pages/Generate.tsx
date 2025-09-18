@@ -96,12 +96,24 @@ export default function Generate() {
 
   function extractImageUrls(data: any): string[] {
     if (!data) return [];
-    if (Array.isArray(data)) return data.filter((v) => typeof v === "string");
+    if (Array.isArray(data)) {
+      const out: string[] = [];
+      for (const item of data) {
+        if (typeof item === "string") out.push(item);
+        else if (item && typeof item === "object") {
+          const obj = item as Record<string, any>;
+          if (typeof obj.secure_url === "string") out.push(obj.secure_url);
+          else if (typeof obj.url === "string") out.push(obj.url);
+        }
+      }
+      return out;
+    }
     if (typeof data === "object") {
       const keys = ["urls", "images", "results", "data", "output"];
       for (const k of keys) {
         const v = (data as any)[k];
-        if (Array.isArray(v)) return v.filter((x) => typeof x === "string");
+        const extracted = extractImageUrls(v);
+        if (extracted.length) return extracted;
       }
     }
     if (typeof data === "string") {
