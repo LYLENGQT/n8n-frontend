@@ -162,12 +162,13 @@ export default function Generate() {
     }
 
     if (!urls || urls.length === 0) {
-      urls = Array.from({ length: 4 }).map((_, i) =>
-        `data:image/svg+xml;utf8,${encodeURIComponent(
-          `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
-            i + 1
-          }</text></svg>`,
-        )}`,
+      urls = Array.from({ length: 4 }).map(
+        (_, i) =>
+          `data:image/svg+xml;utf8,${encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
+              i + 1
+            }</text></svg>`,
+          )}`,
       );
     }
 
