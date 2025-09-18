@@ -133,7 +133,7 @@ export default function Generate() {
     let urls: string[] = [];
     try {
       const DEFAULT_WEBHOOK_URL =
-        "https://n8n.srv931715.hstgr.cloud/webhook-test/virtual-photoshoot";
+        "https://n8n.srv931715.hstgr.cloud/webhook/virtual-photoshoot";
       const WEBHOOK_URL =
         ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ??
         DEFAULT_WEBHOOK_URL;
