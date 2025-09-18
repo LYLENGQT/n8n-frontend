@@ -82,6 +82,19 @@ export default function Generate() {
 
   const runGenerate = async () => {
     setIsGenerating(true);
+
+    try {
+      const WEBHOOK_URL = (import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined;
+      if (WEBHOOK_URL && selectedPackageId && file) {
+        const fd = new FormData();
+        fd.append("packageId", selectedPackageId);
+        fd.append("file", file, file.name);
+        await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+      }
+    } catch (e) {
+      // Ignore webhook failure for now; UI generation continues
+    }
+
     await new Promise((r) => setTimeout(r, 1200));
     const imgs = Array.from({ length: 4 }).map((_, i) =>
       `data:image/svg+xml;utf8,${encodeURIComponent(
