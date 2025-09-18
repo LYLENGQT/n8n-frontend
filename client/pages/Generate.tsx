@@ -397,13 +397,6 @@ export default function Generate() {
                 </>
               )}
             </Button>
-            <Button
-              onClick={runGenerate}
-              disabled={isGenerating}
-              className="h-12 px-6"
-            >
-              Next
-            </Button>
           </div>
 
           {isGenerating && (
