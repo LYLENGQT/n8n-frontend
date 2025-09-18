@@ -94,9 +94,31 @@ export default function Generate() {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
+  function extractImageUrls(data: any): string[] {
+    if (!data) return [];
+    if (Array.isArray(data)) return data.filter((v) => typeof v === "string");
+    if (typeof data === "object") {
+      const keys = ["urls", "images", "results", "data", "output"];
+      for (const k of keys) {
+        const v = (data as any)[k];
+        if (Array.isArray(v)) return v.filter((x) => typeof x === "string");
+      }
+    }
+    if (typeof data === "string") {
+      try {
+        const parsed = JSON.parse(data);
+        return extractImageUrls(parsed);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+
   const runGenerate = async () => {
     setIsGenerating(true);
 
+    let urls: string[] = [];
     try {
       const DEFAULT_WEBHOOK_URL =
         "https://n8n.srv931715.hstgr.cloud/webhook-test/virtual-photoshoot";
@@ -107,28 +129,44 @@ export default function Generate() {
         const fd = new FormData();
         fd.append("packageName", selectedPackage?.name ?? selectedPackageId);
         fd.append("file", file, file.name);
-        await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+        const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+        if (res.ok) {
+          const ct = res.headers.get("content-type") || "";
+          if (ct.includes("application/json")) {
+            const data = await res.json();
+            urls = extractImageUrls(data);
+          } else {
+            const text = await res.text();
+            try {
+              urls = extractImageUrls(JSON.parse(text));
+            } catch {
+              urls = [];
+            }
+          }
+        }
       }
     } catch (e) {
-      // Ignore webhook failure for now; UI generation continues
+      urls = [];
     }
 
-    await new Promise((r) => setTimeout(r, 1200));
-    const imgs = Array.from({ length: 4 }).map(
-      (_, i) =>
+    if (!urls || urls.length === 0) {
+      urls = Array.from({ length: 4 }).map((_, i) =>
         `data:image/svg+xml;utf8,${encodeURIComponent(
           `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
             i + 1
           }</text></svg>`,
         )}`,
-    );
-    setResults(imgs);
+      );
+    }
+
+    const finalImgs = urls.slice(0, 4);
+    setResults(finalImgs);
     if (selectedPackageId) {
       addRecord({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         createdAt: Date.now(),
         packageId: selectedPackageId,
-        images: imgs,
+        images: finalImgs,
       });
     }
     setIsGenerating(false);
