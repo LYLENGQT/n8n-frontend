@@ -2,8 +2,21 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { addRecord } from "@/lib/history";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, ChevronLeft, CloudUpload, Loader2, RefreshCw, Sparkles, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Check,
+  ChevronLeft,
+  CloudUpload,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+  X,
+} from "lucide-react";
 
 type PosePackage = {
   id: string;
@@ -11,7 +24,10 @@ type PosePackage = {
 };
 
 const POSE_PACKAGES: PosePackage[] = [
-  { id: "Candid Face to Face Event Speaker", name: "Candid Face to Face Event Speaker" },
+  {
+    id: "Candid Face to Face Event Speaker",
+    name: "Candid Face to Face Event Speaker",
+  },
   { id: "Standard Photoshoot", name: "Standard Photoshoot" },
   { id: "Smiling", name: "Smiling" },
   { id: "Serious", name: "Serious" },
@@ -82,8 +98,11 @@ export default function Generate() {
     setIsGenerating(true);
 
     try {
-      const DEFAULT_WEBHOOK_URL = "https://n8n.srv931715.hstgr.cloud/webhook-test/virtual-photoshoot";
-      const WEBHOOK_URL = ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ?? DEFAULT_WEBHOOK_URL;
+      const DEFAULT_WEBHOOK_URL =
+        "https://n8n.srv931715.hstgr.cloud/webhook-test/virtual-photoshoot";
+      const WEBHOOK_URL =
+        ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ??
+        DEFAULT_WEBHOOK_URL;
       if (WEBHOOK_URL && selectedPackageId && file) {
         const fd = new FormData();
         fd.append("packageName", selectedPackage?.name ?? selectedPackageId);
@@ -95,16 +114,22 @@ export default function Generate() {
     }
 
     await new Promise((r) => setTimeout(r, 1200));
-    const imgs = Array.from({ length: 4 }).map((_, i) =>
-      `data:image/svg+xml;utf8,${encodeURIComponent(
-        `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
-          i + 1
-        }</text></svg>`,
-      )}`,
+    const imgs = Array.from({ length: 4 }).map(
+      (_, i) =>
+        `data:image/svg+xml;utf8,${encodeURIComponent(
+          `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
+            i + 1
+          }</text></svg>`,
+        )}`,
     );
     setResults(imgs);
     if (selectedPackageId) {
-      addRecord({ id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`, createdAt: Date.now(), packageId: selectedPackageId, images: imgs });
+      addRecord({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: Date.now(),
+        packageId: selectedPackageId,
+        images: imgs,
+      });
     }
     setIsGenerating(false);
   };
@@ -127,17 +152,44 @@ export default function Generate() {
       <header className="flex items-center justify-between gap-2">
         <div>
           {step > 1 && (
-            <Button variant="ghost" className="gap-2" onClick={() => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))}>
+            <Button
+              variant="ghost"
+              className="gap-2"
+              onClick={() =>
+                setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3) : s))
+              }
+            >
               <ChevronLeft className="size-4" /> Back
             </Button>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 1 && "font-semibold text-foreground")}>1. Choose Pose Package</span>
+          <span
+            className={cn(
+              "px-2 py-1 rounded bg-accent",
+              step === 1 && "font-semibold text-foreground",
+            )}
+          >
+            1. Choose Pose Package
+          </span>
           <span>→</span>
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 2 && "font-semibold text-foreground")}>2. Upload Image</span>
+          <span
+            className={cn(
+              "px-2 py-1 rounded bg-accent",
+              step === 2 && "font-semibold text-foreground",
+            )}
+          >
+            2. Upload Image
+          </span>
           <span>→</span>
-          <span className={cn("px-2 py-1 rounded bg-accent", step === 3 && "font-semibold text-foreground")}>3. Generate</span>
+          <span
+            className={cn(
+              "px-2 py-1 rounded bg-accent",
+              step === 3 && "font-semibold text-foreground",
+            )}
+          >
+            3. Generate
+          </span>
         </div>
         <div className="w-[88px]" />
       </header>
@@ -169,13 +221,19 @@ export default function Generate() {
               </button>
             ))}
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">Hover to preview poses on desktop. Tap to expand on mobile.</p>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Hover to preview poses on desktop. Tap to expand on mobile.
+          </p>
 
-          <Dialog open={!!previewPackageId} onOpenChange={(o) => !o && setPreviewPackageId(null)}>
+          <Dialog
+            open={!!previewPackageId}
+            onOpenChange={(o) => !o && setPreviewPackageId(null)}
+          >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {POSE_PACKAGES.find((pp) => pp.id === previewPackageId)?.name || "Pose Package"}
+                  {POSE_PACKAGES.find((pp) => pp.id === previewPackageId)
+                    ?.name || "Pose Package"}
                 </DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-2">
@@ -186,7 +244,8 @@ export default function Generate() {
               <div className="flex justify-end pt-2">
                 <Button
                   onClick={() => {
-                    if (previewPackageId) setSelectedPackageId(previewPackageId);
+                    if (previewPackageId)
+                      setSelectedPackageId(previewPackageId);
                     setAdvanceOnPackage(true);
                     setPreviewPackageId(null);
                   }}
@@ -197,7 +256,9 @@ export default function Generate() {
             </DialogContent>
           </Dialog>
           <div className="pt-4 flex justify-end">
-            <Button onClick={() => setStep(2)} disabled={!selectedPackageId}>Next</Button>
+            <Button onClick={() => setStep(2)} disabled={!selectedPackageId}>
+              Next
+            </Button>
           </div>
         </section>
       )}
@@ -212,7 +273,11 @@ export default function Generate() {
             {previewUrl ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Uploaded preview" className="absolute inset-0 w-full h-full object-cover" />
+                <img
+                  src={previewUrl}
+                  alt="Uploaded preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
                 <button
                   aria-label="Clear image"
                   onClick={() => {
@@ -230,23 +295,34 @@ export default function Generate() {
               <>
                 <CloudUpload className="size-8 text-muted-foreground mb-3" />
                 <p className="text-sm">Drag and drop image here</p>
-                <p className="text-xs text-muted-foreground">Max size 10MB. JPG/PNG supported.</p>
+                <p className="text-xs text-muted-foreground">
+                  Max size 10MB. JPG/PNG supported.
+                </p>
               </>
             )}
           </div>
           <div className="flex items-center gap-3">
             <label className="relative">
-              <input type="file" accept="image/*" onChange={onInput} className="hidden" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onInput}
+                className="hidden"
+              />
               <span className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">
                 <CloudUpload className="size-4" /> Upload
               </span>
             </label>
             {file && (
-              <span className="text-xs text-muted-foreground truncate">Selected: {file.name}</span>
+              <span className="text-xs text-muted-foreground truncate">
+                Selected: {file.name}
+              </span>
             )}
           </div>
           <div className="pt-2 flex justify-end">
-            <Button onClick={() => setStep(3)} disabled={!file}>Next</Button>
+            <Button onClick={() => setStep(3)} disabled={!file}>
+              Next
+            </Button>
           </div>
         </section>
       )}
@@ -254,7 +330,11 @@ export default function Generate() {
       {step === 3 && (
         <section aria-label="Generate" className="space-y-6">
           <div className="flex items-center justify-center gap-2">
-            <Button onClick={runGenerate} disabled={isGenerating} className="h-12 px-6">
+            <Button
+              onClick={runGenerate}
+              disabled={isGenerating}
+              className="h-12 px-6"
+            >
               {isGenerating ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
@@ -267,7 +347,13 @@ export default function Generate() {
                 </>
               )}
             </Button>
-            <Button onClick={runGenerate} disabled={isGenerating} className="h-12 px-6">Next</Button>
+            <Button
+              onClick={runGenerate}
+              disabled={isGenerating}
+              className="h-12 px-6"
+            >
+              Next
+            </Button>
           </div>
 
           {isGenerating && (
@@ -280,18 +366,30 @@ export default function Generate() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {results.map((src, i) => (
-                  <div key={i} className="rounded-lg border bg-card p-2 flex flex-col gap-2">
+                  <div
+                    key={i}
+                    className="rounded-lg border bg-card p-2 flex flex-col gap-2"
+                  >
                     <div className="aspect-square rounded-md bg-muted overflow-hidden flex items-center justify-center">
                       {src ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={src} alt={`Generated ${i + 1}`} className="w-full h-full object-cover" />
+                        <img
+                          src={src}
+                          alt={`Generated ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <Loader2 className="size-6 animate-spin text-muted-foreground" />
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" className="flex-1">Add to Library</Button>
-                      <Button variant="outline" onClick={() => regenerateOne(i)}>
+                      <Button variant="secondary" className="flex-1">
+                        Add to Library
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => regenerateOne(i)}
+                      >
                         <RefreshCw className="size-4" />
                       </Button>
                     </div>
@@ -300,14 +398,17 @@ export default function Generate() {
               </div>
               <div className="pt-2">
                 <Button variant="ghost" onClick={runGenerate} className="gap-2">
-                  <Sparkles className="size-4" /> Generate Again with Same Package
+                  <Sparkles className="size-4" /> Generate Again with Same
+                  Package
                 </Button>
               </div>
             </div>
           )}
 
           {!results.length && !isGenerating && (
-            <p className="text-center text-sm text-muted-foreground">Choose a package and upload an image to generate results.</p>
+            <p className="text-center text-sm text-muted-foreground">
+              Choose a package and upload an image to generate results.
+            </p>
           )}
         </section>
       )}
@@ -315,7 +416,8 @@ export default function Generate() {
       <footer className="pt-4 border-t text-xs text-muted-foreground">
         {selectedPackage ? (
           <div>
-            Selected package: <span className="font-medium">{selectedPackage.name}</span>
+            Selected package:{" "}
+            <span className="font-medium">{selectedPackage.name}</span>
           </div>
         ) : (
           <div>Select a package to begin.</div>
