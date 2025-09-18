@@ -11,12 +11,10 @@ type PosePackage = {
 };
 
 const POSE_PACKAGES: PosePackage[] = [
-  { id: "classic", name: "Classic" },
-  { id: "dynamic", name: "Dynamic" },
-  { id: "studio", name: "Studio" },
-  { id: "action", name: "Action" },
-  { id: "fashion", name: "Fashion" },
-  { id: "portrait", name: "Portrait" },
+  { id: "Candid Face to Face Event Speaker", name: "Candid Face to Face Event Speaker" },
+  { id: "Standard Photoshoot", name: "Standard Photoshoot" },
+  { id: "Smiling", name: "Smiling" },
+  { id: "Serious", name: "Serious" },
 ];
 
 export default function Generate() {
@@ -87,7 +85,7 @@ export default function Generate() {
       const WEBHOOK_URL = (import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined;
       if (WEBHOOK_URL && selectedPackageId && file) {
         const fd = new FormData();
-        fd.append("packageId", selectedPackageId);
+        fd.append("packageName", selectedPackage?.name ?? selectedPackageId);
         fd.append("file", file, file.name);
         await fetch(WEBHOOK_URL, { method: "POST", body: fd });
       }
