@@ -132,6 +132,9 @@ export default function Generate() {
   const [taskStatuses, setTaskStatuses] = useState<
     { taskId: string; status: string; message?: string }[]
   >([]);
+  const [previewLightbox, setPreviewLightbox] = useState<{ open: boolean; src: string | null; index: number; flat: string[] }>(
+    { open: false, src: null, index: 0, flat: [] },
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Derive selected package
@@ -497,12 +500,14 @@ export default function Generate() {
                 {(() => {
                   const pkg = POSE_PACKAGES.find((pp) => pp.id === previewPackageId);
                   const src = pkg?.previews?.[0];
+                  const allPreviews = pkg?.previews || [];
                   return src ? (
                     <img
                       key={0}
                       src={src}
                       alt="Preview 1"
-                      className="col-span-3 aspect-[4/3] w-full h-full object-cover object-top rounded-md"
+                      className="col-span-3 aspect-[4/3] w-full h-full object-cover object-top rounded-md cursor-zoom-in transition-transform duration-200 hover:scale-[1.02]"
+                      onClick={() => setPreviewLightbox({ open: true, src, index: 0, flat: allPreviews })}
                     />
                   ) : (
                     <div key={0} className="col-span-3 aspect-[4/3] rounded-md bg-muted" />
@@ -518,12 +523,14 @@ export default function Generate() {
                         (pp) => pp.id === previewPackageId,
                       );
                       const src = pkg?.previews?.[i + 1];
+                      const allPreviews = pkg?.previews || [];
                       return src ? (
                         <img
                           key={i + 1}
                           src={src}
                           alt={`Preview ${i + 2}`}
-                          className="aspect-square w-full h-full object-cover object-top rounded-md"
+                          className="aspect-square w-full h-full object-cover object-top rounded-md cursor-zoom-in transition-transform duration-200 hover:scale-[1.02]"
+                          onClick={() => setPreviewLightbox({ open: true, src, index: i + 1, flat: allPreviews })}
                         />
                       ) : (
                         <div key={i + 1} className="aspect-square rounded-md bg-muted" />
@@ -785,6 +792,48 @@ export default function Generate() {
           <div>Select a package to begin.</div>
         )}
       </footer>
+
+      {/* Preview Lightbox */}
+      <Dialog open={previewLightbox.open} onOpenChange={(o) => setPreviewLightbox((s) => ({ ...s, open: o }))}>
+        <DialogContent className="sm:max-w-4xl">
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {previewLightbox.src && (
+              <img src={previewLightbox.src} alt="preview" className="w-full h-auto object-contain" />
+            )}
+            <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between text-xs text-muted-foreground bg-background/80 backdrop-blur">
+              <span>
+                {previewLightbox.index + 1} / {previewLightbox.flat.length}
+              </span>
+              <div className="space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setPreviewLightbox((s) => {
+                      const next = (s.index - 1 + s.flat.length) % s.flat.length;
+                      return { ...s, index: next, src: s.flat[next] };
+                    })
+                  }
+                >
+                  Prev
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    setPreviewLightbox((s) => {
+                      const next = (s.index + 1) % s.flat.length;
+                      return { ...s, index: next, src: s.flat[next] };
+                    })
+                  }
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
