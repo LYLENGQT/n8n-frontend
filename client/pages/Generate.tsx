@@ -396,22 +396,40 @@ export default function Generate() {
                   selectedPackageId === p.id && "ring-2 ring-primary/40",
                 )}
               >
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-muted to-background grid grid-cols-2 grid-rows-2 gap-1 p-1 overflow-hidden">
-                  {(p.previews?.slice(0, 4) ?? Array.from({ length: 4 })).map(
-                    (_v, i) => {
-                      const src = p.previews?.[i];
-                      return src ? (
-                        <img
-                          key={i}
-                          src={src}
-                          alt={`${p.name} preview ${i + 1}`}
-                          className="w-full h-full object-cover rounded"
-                        />
-                      ) : (
-                        <div key={i} className="bg-muted rounded" />
-                      );
-                    },
-                  )}
+                <div className="aspect-square rounded-lg bg-gradient-to-br from-muted to-background grid grid-cols-4 gap-1 p-1 overflow-hidden">
+                  {/* First image - 4:3 aspect ratio, spans 3 columns */}
+                  {(() => {
+                    const src = p.previews?.[0];
+                    return src ? (
+                      <img
+                        key={0}
+                        src={src}
+                        alt={`${p.name} preview 1`}
+                        className="col-span-3 aspect-[4/3] w-full h-full object-cover rounded"
+                      />
+                    ) : (
+                      <div key={0} className="col-span-3 aspect-[4/3] bg-muted rounded" />
+                    );
+                  })()}
+                  
+                  {/* Stacked 1:1 images - spans 1 column */}
+                  <div className="col-span-1 flex flex-col gap-1">
+                    {(p.previews?.slice(1, 4) ?? Array.from({ length: 3 })).map(
+                      (_v, i) => {
+                        const src = p.previews?.[i + 1];
+                        return src ? (
+                          <img
+                            key={i + 1}
+                            src={src}
+                            alt={`${p.name} preview ${i + 2}`}
+                            className="aspect-square w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <div key={i + 1} className="aspect-square bg-muted rounded" />
+                        );
+                      },
+                    )}
+                  </div>
                 </div>
                 <div className="mt-2 text-sm">{p.name}</div>
                 {selectedPackageId === p.id && (
@@ -438,26 +456,45 @@ export default function Generate() {
                     ?.name || "Pose Package"}
                 </DialogTitle>
               </DialogHeader>
-              <div className="grid grid-cols-2 gap-2">
-                {(POSE_PACKAGES.find((pp) => pp.id === previewPackageId)
-                  ?.previews?.slice(0, 4) ?? Array.from({ length: 4 })).map(
-                  (_v, i) => {
-                    const pkg = POSE_PACKAGES.find(
-                      (pp) => pp.id === previewPackageId,
-                    );
-                    const src = pkg?.previews?.[i];
-                    return src ? (
-                      <img
-                        key={i}
-                        src={src}
-                        alt={`Preview ${i + 1}`}
-                        className="aspect-square w-full h-full object-cover rounded-md"
-                      />
-                    ) : (
-                      <div key={i} className="aspect-square rounded-md bg-muted" />
-                    );
-                  },
-                )}
+              <div className="grid grid-cols-4 gap-2">
+                {/* First image - 4:3 aspect ratio, spans 3 columns */}
+                {(() => {
+                  const pkg = POSE_PACKAGES.find((pp) => pp.id === previewPackageId);
+                  const src = pkg?.previews?.[0];
+                  return src ? (
+                    <img
+                      key={0}
+                      src={src}
+                      alt="Preview 1"
+                      className="col-span-3 aspect-[4/3] w-full h-full object-cover rounded-md"
+                    />
+                  ) : (
+                    <div key={0} className="col-span-3 aspect-[4/3] rounded-md bg-muted" />
+                  );
+                })()}
+                
+                {/* Stacked 1:1 images - spans 1 column */}
+                <div className="col-span-1 flex flex-col gap-2">
+                  {(POSE_PACKAGES.find((pp) => pp.id === previewPackageId)
+                    ?.previews?.slice(1, 4) ?? Array.from({ length: 3 })).map(
+                    (_v, i) => {
+                      const pkg = POSE_PACKAGES.find(
+                        (pp) => pp.id === previewPackageId,
+                      );
+                      const src = pkg?.previews?.[i + 1];
+                      return src ? (
+                        <img
+                          key={i + 1}
+                          src={src}
+                          alt={`Preview ${i + 2}`}
+                          className="aspect-square w-full h-full object-cover rounded-md"
+                        />
+                      ) : (
+                        <div key={i + 1} className="aspect-square rounded-md bg-muted" />
+                      );
+                    },
+                  )}
+                </div>
               </div>
               <div className="flex justify-end pt-2">
                 <Button
