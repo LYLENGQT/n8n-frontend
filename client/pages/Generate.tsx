@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { addRecord } from "@/lib/history";
+import { addAllToLibrary } from "@/lib/library";
+import { toast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -91,6 +93,9 @@ export default function Generate() {
   const [advanceOnPackage, setAdvanceOnPackage] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<string[]>([]);
+  const [taskStatuses, setTaskStatuses] = useState<
+    { taskId: string; status: string; message?: string }[]
+  >([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Derive selected package
@@ -146,11 +151,11 @@ export default function Generate() {
     if (Array.isArray(data)) {
       const out: string[] = [];
       for (const item of data) {
-        if (typeof item === "string") out.push(item);
-        else if (item && typeof item === "object") {
-          const obj = item as Record<string, any>;
-          if (typeof obj.secure_url === "string") out.push(obj.secure_url);
-          else if (typeof obj.url === "string") out.push(obj.url);
+        if (typeof item === "string") {
+          out.push(item);
+        } else {
+          // Recursively extract from nested arrays/objects (e.g., [{ data: [{ secure_url }] }])
+          out.push(...extractImageUrls(item));
         }
       }
       return out;
@@ -174,15 +179,43 @@ export default function Generate() {
     return [];
   }
 
+  function extractTaskStatuses(data: any): { taskId: string; status: string; message?: string }[] {
+    const out: { taskId: string; status: string; message?: string }[] = [];
+    const walk = (node: any) => {
+      if (!node) return;
+      if (Array.isArray(node)) {
+        for (const n of node) walk(n);
+        return;
+      }
+      if (typeof node === "object") {
+        const maybeData = (node as any).data ?? node;
+        if (maybeData && typeof maybeData === "object") {
+          const tid = maybeData.task_id;
+          const st = maybeData.status;
+          if (typeof tid === "string" && typeof st === "string") {
+            const msg = (maybeData.error?.message as string | undefined) || (maybeData.logs?.[0] as string | undefined);
+            out.push({ taskId: tid, status: st, message: msg });
+          }
+        }
+        for (const v of Object.values(node)) walk(v);
+      }
+    };
+    walk(data);
+    return out;
+  }
+
   const runGenerate = async () => {
     setIsGenerating(true);
+    setTaskStatuses([]);
 
     let urls: string[] = [];
+    let latestStatuses: { taskId: string; status: string; message?: string }[] = [];
     try {
       const DEFAULT_WEBHOOK_URL =
         "https://n8n.srv931715.hstgr.cloud/webhook/virtual-photoshoot";
       const WEBHOOK_URL =
-        ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ??
+        (typeof window !== "undefined" && localStorage.getItem("webhookUrlOverride")) ||
+        ((import.meta as any).env?.VITE_WEBHOOK_URL as string | undefined) ||
         DEFAULT_WEBHOOK_URL;
       if (WEBHOOK_URL && selectedPackageId && file) {
         const fd = new FormData();
@@ -194,13 +227,55 @@ export default function Generate() {
           if (ct.includes("application/json")) {
             const data = await res.json();
             urls = extractImageUrls(data);
+            const statuses = extractTaskStatuses(data);
+            if (statuses.length) {
+              latestStatuses = statuses;
+              setTaskStatuses(statuses);
+            }
           } else {
             const text = await res.text();
             try {
-              urls = extractImageUrls(JSON.parse(text));
+              const parsed = JSON.parse(text);
+              urls = extractImageUrls(parsed);
+              const statuses = extractTaskStatuses(parsed);
+              if (statuses.length) {
+                latestStatuses = statuses;
+                setTaskStatuses(statuses);
+              }
             } catch {
               urls = [];
             }
+          }
+        } else {
+          // Optional status polling if job ID is provided
+          const statusUrl = localStorage.getItem("statusApiUrl") || "";
+          const statusKey = localStorage.getItem("statusApiKey") || "";
+          if (statusUrl) {
+            try {
+              const jobId = res.headers.get("x-job-id") || "";
+              if (jobId) {
+                const start = Date.now();
+                while (Date.now() - start < 60000 && urls.length === 0) {
+                  const statusRes = await fetch(statusUrl.replace("{jobId}", jobId), {
+                    headers: statusKey ? { Authorization: `Bearer ${statusKey}` } : undefined,
+                  });
+                  if (statusRes.ok) {
+                    const payload = await statusRes.json();
+                    const out = extractImageUrls(payload);
+                    if (out.length) {
+                      urls = out;
+                      break;
+                    }
+                    const statuses = extractTaskStatuses(payload);
+                    if (statuses.length) {
+                      latestStatuses = statuses;
+                      setTaskStatuses(statuses);
+                    }
+                  }
+                  await new Promise((r) => setTimeout(r, 1500));
+                }
+              }
+            } catch {}
           }
         }
       }
@@ -209,19 +284,24 @@ export default function Generate() {
     }
 
     if (!urls || urls.length === 0) {
-      urls = Array.from({ length: 4 }).map(
-        (_, i) =>
-          `data:image/svg+xml;utf8,${encodeURIComponent(
-            `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
-              i + 1
-            }</text></svg>`,
-          )}`,
+      const hasFailed = latestStatuses.some(
+        (s) => (s.status || "").toLowerCase() === "failed",
       );
+      if (!hasFailed) {
+        urls = Array.from({ length: 4 }).map(
+          (_, i) =>
+            `data:image/svg+xml;utf8,${encodeURIComponent(
+              `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='100%' height='100%' fill='hsl(0,0%,92%)' /><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='hsl(0,0%,40%)' font-family='Inter' font-size='18'>Result ${
+                i + 1
+              }</text></svg>`,
+            )}`,
+        );
+      }
     }
 
     const finalImgs = urls.slice(0, 4);
     setResults(finalImgs);
-    if (selectedPackageId) {
+    if (selectedPackageId && finalImgs.length > 0) {
       addRecord({
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         createdAt: Date.now(),
@@ -293,7 +373,7 @@ export default function Generate() {
       </header>
 
       {step === 1 && (
-        <section aria-label="Choose Pose Package" className="space-y-4">
+        <section aria-label="Choose Pose Package" className="space-y-4 rounded-2xl border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60 p-4 md:p-6 shadow-md hover:shadow-lg transition-shadow">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {POSE_PACKAGES.map((p) => (
               <button
@@ -390,7 +470,7 @@ export default function Generate() {
       )}
 
       {step === 2 && (
-        <section aria-label="Upload Image" className="space-y-4 max-w-3xl mx-auto w-full">
+        <section aria-label="Upload Image" className="space-y-4 max-w-3xl mx-auto w-full rounded-2xl border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60 p-4 md:p-6 shadow-md hover:shadow-lg transition-shadow">
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
@@ -457,12 +537,12 @@ export default function Generate() {
       )}
 
       {step === 3 && (
-        <section aria-label="Generate" className="space-y-6">
+        <section aria-label="Generate" className="space-y-6 rounded-2xl border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60 p-4 md:p-6 shadow-md hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-center gap-2">
             <Button
               onClick={runGenerate}
               disabled={isGenerating}
-              className="h-12 px-6"
+              className="h-12 px-6 bg-primary-accent hover:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
             >
               {isGenerating ? (
                 <>
@@ -484,8 +564,80 @@ export default function Generate() {
             </div>
           )}
 
-          {results.length > 0 && (
+          {taskStatuses.length > 0 && (() => {
+            const failed = taskStatuses.find((t) => (t.status || "").toLowerCase() === "failed");
+            const succeeded = taskStatuses.some((t) => (t.status || "").toLowerCase() === "succeeded");
+            const processing = taskStatuses.some((t) => {
+              const s = (t.status || "").toLowerCase();
+              return s !== "failed" && s !== "succeeded";
+            });
+            const message = failed
+              ? "Generation Failed. Check Backend."
+              : succeeded && results.length > 0
+              ? "Generation Completed."
+              : processing
+              ? "Generation In Progress..."
+              : "Generation Status Updated.";
+            const badgeClass = failed
+              ? "bg-destructive/10 text-destructive"
+              : succeeded && results.length > 0
+              ? "bg-emerald-500/10 text-emerald-600"
+              : "bg-primary/10 text-primary";
+            const detail = (() => {
+              const raw = (failed?.message || "").trim();
+              if (!raw) return undefined;
+              const lower = raw.toLowerCase();
+              if (lower.includes("failed to do request")) {
+                return "Request Failed. Please Try Again or Check Backend.";
+              }
+              // Basic sentence-case fallback
+              return raw.charAt(0).toUpperCase() + raw.slice(1);
+            })();
+            return (
+              <div className="mx-auto max-w-2xl rounded-lg border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60 p-3 text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-medium">{message}</div>
+                    {detail && <div className="text-xs mt-1 text-destructive">{detail}</div>}
+                  </div>
+                  <span className={cn("px-2 py-0.5 rounded text-xs", badgeClass)}>
+                    {failed ? "Failed" : succeeded && results.length > 0 ? "Succeeded" : "Processing"}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {results.length > 0 && (() => {
+            const hasFailed = taskStatuses.some(
+              (s) => (s.status || "").toLowerCase() === "failed",
+            );
+            if (hasFailed) return null;
+            return (
             <div className="space-y-4">
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (results.length) {
+                      const added = addAllToLibrary(results, { packageId: selectedPackageId ?? undefined });
+                      if (added) {
+                        toast({
+                          title: "Added to Library",
+                          description: `${results.length} image${results.length > 1 ? "s" : ""} saved`,
+                        });
+                      } else {
+                        toast({
+                          title: "Already Saved",
+                          description: "These images are already in your library.",
+                        });
+                      }
+                    }
+                  }}
+                >
+                  Add All to Library
+                </Button>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {results.map((src, i) => (
                   <div
@@ -499,6 +651,8 @@ export default function Generate() {
                           src={src}
                           alt={`Generated ${i + 1}`}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />
                       ) : (
                         <Loader2 className="size-6 animate-spin text-primary" />
@@ -525,7 +679,8 @@ export default function Generate() {
                 </Button>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {!results.length && !isGenerating && (
             <p className="text-center text-sm text-muted-foreground">

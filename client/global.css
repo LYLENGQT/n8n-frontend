@@ -15,30 +15,32 @@
     --background: 0 0% 99%;
     --foreground: 222 47% 11%;
 
+    /* Elevated surfaces are perceptibly lighter than background */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 222 89% 56%;
+    /* Brand hues */
+    --primary: 222 90% 58%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 96%;
+    --secondary: 220 15% 96%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 14% 97%;
+    /* Supporting */
+    --muted: 220 16% 97%;
     --muted-foreground: 215 16% 47%;
-
-    --accent: 222 89% 97%;
+    --accent: 222 90% 97%;
     --accent-foreground: 222 47% 11%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
-    --ring: 222 89% 56%;
+    /* Borders around 12–18% opacity feel subtle; keep lightness accordingly */
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 222 90% 58%;
 
     --radius: 0.75rem;
 
@@ -63,13 +65,14 @@
     --background: 222 40% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222 41% 8%;
+    /* Elevated surfaces are perceptibly lighter than background */
+    --card: 222 35% 12%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 41% 8%;
+    --popover: 222 35% 12%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 222 89% 66%;
+    --primary: 222 90% 66%;
     --primary-foreground: 222 40% 6%;
 
     --secondary: 217 19% 16%;
@@ -78,23 +81,24 @@
     --muted: 217 19% 16%;
     --muted-foreground: 216 12% 65%;
 
-    --accent: 222 41% 14%;
+    --accent: 222 35% 14%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Subtle borders at ~15% perceived opacity */
     --border: 217 19% 20%;
     --input: 217 19% 20%;
-    --ring: 222 89% 66%;
+    --ring: 222 90% 66%;
     --sidebar-background: 222 41% 10%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 222 89% 66%;
+    --sidebar-primary: 222 90% 66%;
     --sidebar-primary-foreground: 222 40% 6%;
-    --sidebar-accent: 222 41% 14%;
+    --sidebar-accent: 222 35% 14%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 217 19% 18%;
-    --sidebar-ring: 222 89% 66%;
+    --sidebar-ring: 222 90% 66%;
   }
 }
 
@@ -105,5 +109,60 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Subtle global background mesh + grid overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1200px 800px at 20% -10%, hsl(var(--primary)/0.08), transparent 60%),
+      radial-gradient(1000px 600px at 110% 10%, hsl(var(--accent)/0.12), transparent 60%),
+      linear-gradient(180deg, transparent 0%, hsl(var(--muted)/0.4) 100%),
+      linear-gradient(0deg, transparent 0%, hsl(var(--muted)/0.2) 100%),
+      repeating-linear-gradient(
+        0deg,
+        hsl(var(--border)/0.15) 0px,
+        hsl(var(--border)/0.15) 1px,
+        transparent 1px,
+        transparent 24px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        hsl(var(--border)/0.1) 0px,
+        hsl(var(--border)/0.1) 1px,
+        transparent 1px,
+        transparent 24px
+      );
+    z-index: 0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  /* Primary gradient accent for backgrounds (e.g., badges or CTA) */
+  .bg-primary-accent {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.95) 0%,
+      hsl(260 90% 62% / 0.95) 50%,
+      hsl(290 90% 62% / 0.95) 100%
+    );
+  }
+
+  /* Consistent icon size/spacing helper */
+  .icon {
+    @apply size-4 text-muted-foreground;
   }
 }
