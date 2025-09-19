@@ -153,6 +153,14 @@ export default function Generate() {
       for (const item of data) {
         if (typeof item === "string") {
           out.push(item);
+        } else if (typeof item === "object" && item !== null) {
+          // Check for secure_url property in objects
+          if (item.secure_url && typeof item.secure_url === "string") {
+            out.push(item.secure_url);
+          } else {
+            // Recursively extract from nested arrays/objects (e.g., [{ data: [{ secure_url }] }])
+            out.push(...extractImageUrls(item));
+          }
         } else {
           // Recursively extract from nested arrays/objects (e.g., [{ data: [{ secure_url }] }])
           out.push(...extractImageUrls(item));
@@ -161,6 +169,10 @@ export default function Generate() {
       return out;
     }
     if (typeof data === "object") {
+      // Check for secure_url property in objects
+      if (data.secure_url && typeof data.secure_url === "string") {
+        return [data.secure_url];
+      }
       const keys = ["urls", "images", "results", "data", "output"];
       for (const k of keys) {
         const v = (data as any)[k];
