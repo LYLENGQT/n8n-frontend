@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm run build:client",
+  "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/", "destination": "/app/generate", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+

@@ -1,0 +1,10 @@
+node_modules
+server
+netlify
+dist
+coverage
+.vscode
+*.log
+**/*.test.*
+**/*.spec.*
+
