@@ -441,7 +441,7 @@ export default function Generate() {
                         key={0}
                         src={src}
                         alt={`${p.name} preview 1`}
-                        className="col-span-3 aspect-[4/3] w-full h-full object-contain rounded"
+                        className="col-span-3 aspect-[4/3] w-full h-full object-cover object-top rounded"
                       />
                     ) : (
                       <div key={0} className="col-span-3 aspect-[4/3] bg-muted rounded" />
@@ -458,7 +458,7 @@ export default function Generate() {
                             key={i + 1}
                             src={src}
                             alt={`${p.name} preview ${i + 2}`}
-                            className="aspect-square w-full h-full object-contain rounded"
+                            className="aspect-square w-full h-full object-cover object-top rounded"
                           />
                         ) : (
                           <div key={i + 1} className="aspect-square bg-muted rounded" />
@@ -502,7 +502,7 @@ export default function Generate() {
                       key={0}
                       src={src}
                       alt="Preview 1"
-                      className="col-span-3 aspect-[4/3] w-full h-full object-contain rounded-md"
+                      className="col-span-3 aspect-[4/3] w-full h-full object-cover object-top rounded-md"
                     />
                   ) : (
                     <div key={0} className="col-span-3 aspect-[4/3] rounded-md bg-muted" />
@@ -523,7 +523,7 @@ export default function Generate() {
                           key={i + 1}
                           src={src}
                           alt={`Preview ${i + 2}`}
-                          className="aspect-square w-full h-full object-contain rounded-md"
+                          className="aspect-square w-full h-full object-cover object-top rounded-md"
                         />
                       ) : (
                         <div key={i + 1} className="aspect-square rounded-md bg-muted" />
@@ -735,7 +735,7 @@ export default function Generate() {
                         <img
                           src={src}
                           alt={`Generated ${i + 1}`}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover object-top"
                           loading="lazy"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         />

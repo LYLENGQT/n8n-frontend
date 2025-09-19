@@ -111,7 +111,7 @@ export default function Library() {
                 {group.images.map((src, i) => (
                   <div key={i} className="group relative aspect-square rounded-lg bg-muted overflow-hidden transition-transform duration-200 hover:scale-[1.02] cursor-zoom-in">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="saved" className="w-full h-full object-contain" loading="lazy" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 16vw" onClick={() => setLightbox({ open: true, src, index: i, flat: group.images })} />
+                    <img src={src} alt="saved" className="w-full h-full object-cover object-top" loading="lazy" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 16vw" onClick={() => setLightbox({ open: true, src, index: i, flat: group.images })} />
                     <div className="absolute inset-x-0 bottom-0 p-2 flex gap-2 justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button size="sm" variant="secondary" aria-label="Download"><Download className="size-4" /></Button>
                       <Button size="sm" variant="outline" aria-label="Share"><Share2 className="size-4" /></Button>

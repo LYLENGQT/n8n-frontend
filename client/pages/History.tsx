@@ -106,7 +106,7 @@ export default function History() {
                 {rec.images.map((src, i) => (
                   <div key={i} className="aspect-square rounded-lg bg-muted overflow-hidden transition-transform duration-200 hover:scale-[1.02] cursor-zoom-in">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="history" className="w-full h-full object-contain" loading="lazy" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" onClick={() => setLightbox({ open: true, src, index: i, flat: rec.images })} />
+                    <img src={src} alt="history" className="w-full h-full object-cover object-top" loading="lazy" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" onClick={() => setLightbox({ open: true, src, index: i, flat: rec.images })} />
                   </div>
                 ))}
               </div>
