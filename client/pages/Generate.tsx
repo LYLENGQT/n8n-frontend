@@ -70,6 +70,17 @@ const SERIOUS_PREVIEWS: string[] = [
     "https://res.cloudinary.com/dcxib2abj/image/upload/v1757935785/u2zgkz05q3hfp6w5nn25.png",
 ];
 
+const CONTEMPORARY_FASHION_PREVIEWS: string[] = [
+  ((import.meta as any).env?.VITE_CONTEMPORARY_FASHION_PREVIEW_1 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758003610/igkgavtkcgkozym1vjlt.png",
+  ((import.meta as any).env?.VITE_CONTEMPORARY_FASHION_PREVIEW_2 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758003610/gb7q2yc6sgimkzqvdmke.png",
+  ((import.meta as any).env?.VITE_CONTEMPORARY_FASHION_PREVIEW_3 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758003610/qengskktroikd9fpmh0n.png",
+  ((import.meta as any).env?.VITE_CONTEMPORARY_FASHION_PREVIEW_4 as string) ||
+    "https://res.cloudinary.com/dcxib2abj/image/upload/v1758003610/ns6vmh4881m3ufhbufma.png",
+];
+
 const POSE_PACKAGES: PosePackage[] = [
   {
     id: "Candid Face to Face Event Speaker",
@@ -79,6 +90,7 @@ const POSE_PACKAGES: PosePackage[] = [
   { id: "Standard Photoshoot", name: "Standard Photoshoot", previews: STANDARD_PREVIEWS },
   { id: "Smiling", name: "Smiling", previews: SMILING_PREVIEWS },
   { id: "Serious", name: "Serious", previews: SERIOUS_PREVIEWS },
+  { id: "Contemporary Fashion", name: "Contemporary Fashion", previews: CONTEMPORARY_FASHION_PREVIEWS },
 ];
 
 export default function Generate() {
